@@ -1,0 +1,38 @@
+version: "3.9"
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong@Passw0rd"
+    ports:
+      - "1433:1433"
+    platform: linux/amd64
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  backend:
+    image: yfi9a/nbe-backend:latest   # 👈 ياخد آخر صورة من DockerHub
+    container_name: express_backend
+    environment:
+      - DB_SERVER=db
+      - DB_USER=sa
+      - DB_PASS=YourStrong@Passw0rd
+      - DB_NAME=BankingDB
+      - DB_PORT=1433
+    depends_on:
+      - db
+    ports:
+      - "5001:5000"
+
+  frontend:
+    image: yfi9a/nbe-frontend:latest   # 👈 ياخد آخر صورة من DockerHub
+    container_name: react_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  sql_data:
